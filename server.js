@@ -5,14 +5,15 @@ const hbs = require('express-handlebars');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
-const { env } = require('process');
+require('dotenv').config()
 
 const app = express();
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: `${process.env.PASSPORT_GOOGLE_CLIENTID}`,
-      clientSecret: `${process.env.CLIENTSECRET}`,
+      clientSecret: `${process.env.PASSPORT_GOOGLE_CLIENTSECRET}`,
       callbackURL: 'http://localhost:8000/auth/google/callback',
     },
     (accessToken, refreshToken, profile, done) => {
@@ -57,6 +58,11 @@ app.get('/user/logged', (req, res) => {
 app.get('/user/no-permission', (req, res) => {
   res.render('noPermission');
 });
+
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['email', 'profile'] })
+);
 
 app.use('/', (req, res) => {
   res.status(404).render('notFound');
