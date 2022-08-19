@@ -17,11 +17,20 @@ app.engine(
 app.set('view engine', '.hbs');
 
 // init session mechanism
-app.use(session({ secret: 'shortid.generate()' }));
+app.use(session({ secret: shortid.generate() }));
 
 // init passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+// LogIn check middleware
+const isLogged = (req, res, next) => {
+  if (!req.user) {
+    res.redirect('/user-no-permission');
+  } else {
+    next();
+  }
+};
 
 // standard middleware
 app.use(cors());
@@ -34,7 +43,11 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', require('./routes/auth.routes'));
-app.use('/user', require('./routes/user.routes'));
+app.use('/user', isLogged, require('./routes/user.routes'));
+
+app.get('/user-no-permission', (req, res) => {
+  res.render('noPermission');
+});
 
 app.use('/', (req, res) => {
   res.status(404).render('notFound');
