@@ -5,7 +5,7 @@ const hbs = require('express-handlebars');
 const passport = require('passport');
 const session = require('express-session');
 const passportSetup = require('./config/passport');
-const shortid = requeire('shortid');
+const shortid = require('shortid');
 
 const app = express();
 
@@ -17,7 +17,7 @@ app.engine(
 app.set('view engine', '.hbs');
 
 // init session mechanism
-app.use(session({ secret: shortid.generate() }));
+app.use(session({ secret: 'shortid.generate()' }));
 
 // init passport
 app.use(passport.initialize());
