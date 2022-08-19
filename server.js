@@ -4,23 +4,26 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const passport = require('passport');
 const session = require('express-session');
-require('dotenv').config();
-const shortid = require('shortid');
+const passportSetup = require('./config/passport');
+const shortid = requeire('shortid');
 
 const app = express();
 
-const passportConfig = require('./config/passport');
-
-app.use(session({ secret: shortid.generate() }));
-app.use(passport.initialize());
-app.use(passport.session());
-
+// set handlebars as view engine
 app.engine(
   'hbs',
   hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' })
 );
 app.set('view engine', '.hbs');
 
+// init session mechanism
+app.use(session({ secret: shortid.generate() }));
+
+// init passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// standard middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,26 +33,8 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/user/logged', (req, res) => {
-  res.render('logged');
-});
-
-app.get('/user/no-permission', (req, res) => {
-  res.render('noPermission');
-});
-
-app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['email', 'profile'] })
-);
-
-app.get(
-  '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/user/no-permission' }),
-  (req, res) => {
-    res.redirect('/user/logged');
-  }
-);
+app.use('/auth', require('./routes/auth.routes'));
+app.use('/user', require('./routes/user.routes'));
 
 app.use('/', (req, res) => {
   res.status(404).render('notFound');
