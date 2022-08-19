@@ -2,10 +2,43 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const hbs = require('express-handlebars');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
+const { env } = require('process');
 
 const app = express();
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: `${process.env.PASSPORT_GOOGLE_CLIENTID}`,
+      clientSecret: `${process.env.CLIENTSECRET}`,
+      callbackURL: 'http://localhost:8000/auth/google/callback',
+    },
+    (accessToken, refreshToken, profile, done) => {
+      done(null, profile);
+    }
+  )
+);
 
-app.engine('hbs', hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' }));
+// serialize user when saving to session
+passport.serializeUser((user, serialize) => {
+  serialize(null, user);
+});
+
+// deserialize user when reading from session
+passport.deserializeUser((obj, deserialize) => {
+  deserialize(null, obj);
+});
+
+app.use(session({ secret: 'anything' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.engine(
+  'hbs',
+  hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' })
+);
 app.set('view engine', '.hbs');
 
 app.use(cors());
