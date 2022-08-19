@@ -5,7 +5,8 @@ const hbs = require('express-handlebars');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
-require('dotenv').config()
+require('dotenv').config();
+const shortid = require('shortid');
 
 const app = express();
 
@@ -32,7 +33,7 @@ passport.deserializeUser((obj, deserialize) => {
   deserialize(null, obj);
 });
 
-app.use(session({ secret: 'anything' }));
+app.use(session({ secret: shortid.generate() }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -62,6 +63,14 @@ app.get('/user/no-permission', (req, res) => {
 app.get(
   '/auth/google',
   passport.authenticate('google', { scope: ['email', 'profile'] })
+);
+
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/user/no-permission' }),
+  (req, res) => {
+    res.redirect('/user/logged');
+  }
 );
 
 app.use('/', (req, res) => {
