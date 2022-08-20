@@ -10,7 +10,11 @@ router.get('/profile/settings', (req, res) => {
 });
 
 router.get('/logged', (req, res) => {
-  res.render('logged');
+  res.render('logged', {
+    name: req.user.displayName,
+    image: req.user.photos[0].value
+  });
+  console.log(req.user);
 });
 
 module.exports = router;

@@ -38,12 +38,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.use('/auth', require('./routes/auth.routes'));
-app.use('/user', isLogged, require('./routes/user.routes'));
-
 app.get('/', (req, res) => {
   res.render('index');
 });
+
+app.use('/auth', require('./routes/auth.routes'));
+app.use('/user', isLogged, require('./routes/user.routes'));
 
 app.get('/user-no-permission', (req, res) => {
   res.render('noPermission');
